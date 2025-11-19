@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title> JS Form </title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f0f8ff; }
+    table { width: 800px; border: 4px solid black; margin: auto; background: white; }
+    td { padding: 20px; text-align: center; }
+    input, select { padding: 10px; font-size: 18px; width: 90%; }
+    button { padding: 15px 30px; background: blue; color: white; font-size: 18px; border: none; }
+    .save { background: green; font-size: 22px; padding: 18px 60px; }
+    .red { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h2 style="text-align:center; color:darkblue;">Provide your information</h2>
+
+<table>
+  <tr>
+    <td colspan="3" style="background: lightblue; font-size:22px;">
+      <b>Add Fields</b>
+    </td>
+  </tr>
+
+  <tr>
+    <td><input type="text" id="myLabel" placeholder="ex: Name, Gender, Blood group, Degree"></td>
+    <td>
+      <select id="myType">
+        <option>Text Field</option>
+        <option>Radio Button</option>
+        <option>Dropdown</option>
+        <option>Checkbox</option>
+        <option>Date</option>
+        <option>Email</option>
+      </select>
+    </td>
+    <td><button id="addBtn">ADD</button></td>
+  </tr>
+
+  <tr>
+    <td colspan="3" id="div1" style="text-align:left; padding:30px;">
+      <p style="color:gray;">Fields will appear here after clicking ADD</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="3">
+      <button class="save" id="saveBtn">SAVE</button>
+      <p id="error" class="red"></p>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="3" id="result" style="background: lightgreen; display:none; padding:30px;">
+      <h3>Saved Successfully!</h3>
+      <div id="output"></div>
+    </td>
+  </tr>
+</table>
+
+<script>
+
+let inputsList = [];
+
+document.getElementById("addBtn").addEventListener("click", function() {
+  let label = document.getElementById("myLabel").value.trim();
+  let type = document.getElementById("myType").value;
+
+  if (label === "") {
+    alert("Please write a label first!");
+    return;
+  }
+
+  const para = document.createElement("p");
+  para.style.margin = "15px 0";
+  para.style.fontSize = "18px";
+
+  const text = document.createTextNode(label + ": ");
+  para.appendChild(text);
+
+  //input type
+  if (type === "Text Field") {
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.style.width = "350px";
+    para.appendChild(inp);
+    inputsList.push({ type: "text", element: inp, label: label });
+  }
+  else if (type === "Date") {
+    const inp = document.createElement("input");
+    inp.type = "date";
+    para.appendChild(inp);
+    inputsList.push({ type: "date", element: inp, label: label });
+  }
+  else if (type === "Email") {
+    const inp = document.createElement("input");
+    inp.type = "email";
+    inp.placeholder = "example@gmail.com";
+    para.appendChild(inp);
+    inputsList.push({ type: "email", element: inp, label: label });
+  }
+  else if (type === "Radio Button") {
+    const r1 = document.createElement("input");
+    r1.type = "radio"; r1.name = "radio" + inputsList.length;
+    const t1 = document.createTextNode(" Male ");
+    const r2 = document.createElement("input");
+    r2.type = "radio"; r2.name = "radio" + inputsList.length;
+    const t2 = document.createTextNode(" Female ");
+    para.appendChild(t1); para.appendChild(r1);
+    para.appendChild(t2); para.appendChild(r2);
+    inputsList.push({ type: "radio", elements: [r1, r2], label: label });
+  }
+  else if (type === "Dropdown") {
+    const sel = document.createElement("select");
+    const opts = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+    opts.forEach(o => {
+      const op = document.createElement("option");
+      op.text = o; op.value = o;
+      sel.appendChild(op);
+    });
+    para.appendChild(sel);
+    inputsList.push({ type: "dropdown", element: sel, label: label });
+  }
+  else if (type === "Checkbox") {
+
+    const degrees = ["CSE", "BBA", "EEE"];
+    let checkboxes = [];
+    degrees.forEach(d => {
+      const chk = document.createElement("input");
+      chk.type = "checkbox";
+      const txt = document.createTextNode(" " + d + "  ");
+      para.appendChild(chk);
+      para.appendChild(txt);
+      checkboxes.push(chk);
+    });
+    inputsList.push({ type: "checkbox", elements: checkboxes, label: label });
+  }
+
+  document.getElementById("div1").appendChild(para);
+
+  // Clear input
+  document.getElementById("myLabel").value = "";
+});
+
+// SAVE Button
+document.getElementById("saveBtn").addEventListener("click", function() {
+  document.getElementById("error").innerHTML = "";
+  let result = "";
+
+  // Check empty
+  for (let i = 0; i < inputsList.length; i++) {
+    if (inputsList[i].type === "text" || inputsList[i].type === "date" || inputsList[i].type === "email") {
+      if (inputsList[i].element.value === "") {
+        document.getElementById("error").innerHTML = "Please fill all fields!";
+        return;
+      }
+    }
+  }
+
+ //save data
+  for (let i = 0; i < inputsList.length; i++) {
+    let value = "";
+
+    if (inputsList[i].type === "text" || inputsList[i].type === "date" || inputsList[i].type === "email") {
+      value = inputsList[i].element.value;
+    }
+    else if (inputsList[i].type === "radio") {
+      value = inputsList[i].elements[0].checked ? "Male" : inputsList[i].elements[1].checked ? "Female" : "Not selected";
+    }
+    else if (inputsList[i].type === "dropdown") {
+      value = inputsList[i].element.value;
+    }
+    else if (inputsList[i].type === "checkbox") {
+      let selected = [];
+      inputsList[i].elements.forEach((chk, index) => {
+        if (chk.checked) selected.push(["CSE", "BBA", "EEE"][index]);
+      });
+      value = selected.length > 0 ? selected.join(", ") : "None";
+    }
+
+    result += "<p><b>" + inputsList[i].label + ":</b> " + value + "</p>";
+  }
+
+  document.getElementById("output").innerHTML = result;
+  document.getElementById("result").style.display = "block";
+});
+</script>
+
+</body>
+</html>
